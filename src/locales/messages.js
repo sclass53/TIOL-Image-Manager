@@ -266,6 +266,13 @@ export const MESSAGES = {
       "gpu": "GPU 渲染器：{renderer}",
       "gpuSoftware": "（软件渲染 — 硬件加速未生效）",
       "gpuUnknown": "GPU 渲染器：无法检测"
+    },
+    "model": {
+      "downloading": "正在下载 AI 模型",
+      "loading": "正在加载 AI 引擎",
+      "loadingHint": "首次使用需下载模型，请稍候",
+      "failed": "AI 模型加载失败",
+      "failedHint": "详情见设置页"
     }
   },
   "en-US": {
@@ -533,6 +540,13 @@ export const MESSAGES = {
       "gpu": "GPU renderer: {renderer}",
       "gpuSoftware": "(software rendering — hardware acceleration inactive)",
       "gpuUnknown": "GPU renderer: unable to detect"
+    },
+    "model": {
+      "downloading": "Downloading AI model",
+      "loading": "Loading AI engine",
+      "loadingHint": "First run downloads the models — please wait",
+      "failed": "AI model failed to load",
+      "failedHint": "See Settings for details"
     }
   }
 };

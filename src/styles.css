@@ -1746,6 +1746,38 @@ body.platform-mac .titlebar {
   font-size: 11px;
 }
 
+/* Model download / engine-load badge (C-19.29): same look as the tagging
+   badge, anchored bottom-left — the top-right corner already hosts the
+   tagging and reject badges (no stacking manager exists). */
+.model-badge {
+  top: auto;
+  right: auto;
+  bottom: 12px;
+  left: 12px;
+}
+/* Indeterminate phase (engine load / model verification): a sweeping
+   highlight instead of a measured fill, so "still working" is obvious
+   even though the backend emits no percentage for that phase. */
+.tagging-badge__fill--busy {
+  width: 100%;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: modelBusy 1.4s linear infinite;
+}
+@keyframes modelBusy {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
 /* Debug-mode log panel (in-app logs) */
 .settings__log {
   width: 100%;
@@ -2265,4 +2297,10 @@ body.fx-anim-off .toast,
 body.fx-anim-off .update-banner,
 body.fx-anim-off .tagging-badge {
   animation: none !important;
+}
+/* The sweeping "busy" fill is also an animation (C-19.29) — freeze it to a
+   static bar when Effects > Animation is off. */
+body.fx-anim-off .tagging-badge__fill--busy {
+  animation: none !important;
+  background-image: none;
 }

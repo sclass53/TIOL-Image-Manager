@@ -3,6 +3,20 @@
 > 记录影响行为的关键改动与修复，供后续开发参考。环境注意事项见 BUILD.md / LIMITS.md / ADD.md。
 > 改动编号规则：**C-NN**，按时间倒序（最新在最上）；引用改动时直接写编号。
 
+## C-19.29 · 2025-08 — 主界面模型下载/引擎加载进度徽章
+
+**需求**：模型下载时只有设置页有状态文字，主界面看起来像卡死——用户不知道要等。要求像「标记照片」那样的浮动进度条，让人知道程序在忙。
+
+**实现**：
+
+1. **新浮动徽章 `#model-badge`**（index.html，复用 `.tagging-badge` 外观；CSS `.model-badge` 改为 **bottom-left**——右上角已被 tagging/reject 徽章占用且无堆叠避让机制，见 review）：标题 + 进度条 + 计数行。
+2. **两阶段状态**（app.js）：
+   - **下载中**：`model-download` 事件 `status=downloading` → 标题「正在下载 AI 模型」+ 计数 `文件名 42%` + fill 按 payload 的 `progress`（0..1，跨文件合成）推进；
+   - **引擎加载/校验**：`status=locked && file_name === "-"`（全部模型已校验）→ 切「正在加载 AI 引擎」+ 不确定态扫光动画（`.tagging-badge__fill--busy`，`modelBusy` keyframes；`body.fx-anim-off` 下冻结为静态条）。
+3. **启动预检 `primeModelBadge()`**（boot 末尾）：启动即查 `get_ai_status`，非 `locked` 就显示不确定态徽章——首次下载在事件到达前也有反馈，且覆盖「模型已缓存但引擎仍在加载」的空窗（该阶段后端无进度事件）。
+4. **收尾与异常**：徽章显示期间每 2s 轮询 `get_ai_status`——`locked*` → 隐藏（队列随后由 tagging 徽章接管）；`degraded*` → 显示「AI 模型加载失败 / 详情见设置页」，10s 后自动隐藏（失败不再永久挂屏）。两个 `let` 状态声明放在 listener 之前，避免 C-19.22 的 TDZ 复现。
+5. **i18n**：新增 `model.downloading / loading / loadingHint / failed / failedHint`（中英，210 keys 全绿）；设置页原有 `#model-status` 文本行保持不动。
+
 ## C-19.28 · 2025-08 — 新手教程重构 / 预热缩略图键不一致修复 / 代码清理
 
 **需求**：① 重构新手教程，让用户真正「用得懂」；② 重复照片页「跳过 N 张」的数字刷新后不变，要求修复；③ 全面清理：双语文档、无法到达的代码等。

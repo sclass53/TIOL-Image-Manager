@@ -104,6 +104,10 @@ const els = {
   taggingTitle: document.querySelector(".tagging-badge__title"),
   taggingFill: document.getElementById("tagging-fill"),
   taggingCount: document.getElementById("tagging-count"),
+  modelBadge: document.getElementById("model-badge"),
+  modelBadgeTitle: document.getElementById("model-badge-title"),
+  modelBadgeFill: document.getElementById("model-badge-fill"),
+  modelBadgeCount: document.getElementById("model-badge-count"),
   editOverlay: document.getElementById("edit-overlay"),
   editInput: document.getElementById("edit-input"),
   editSave: document.getElementById("edit-save"),
@@ -334,10 +338,13 @@ function inAlbumScope(p, memberIds) {
 }
 
 // ---------------------------------------------------------------------------
-// "Hide duplicate RAWs" view filter (C-19.21): when the same folder holds a
-// JPEG and same-named RAW sidecar(s) (DSC_1234.JPG + DSC_1234.NEF/ARW/...),
-// only the JPEG is shown. Pure frontend filter — applies to ALL grids
-// (photos / rejects / duplicates / search results).
+// "Hide duplicate RAWs" view filter (C-19.21/C-19.29): when a JPEG and
+// same-named RAW sidecar(s) exist (DSC_1234.JPG + DSC_1234.NEF/ARW/...),
+// only the JPEG is shown. Pairing is WHOLE-LIBRARY by stem — the same rule
+// the backend uses to skip indexing those RAW twins (C-19.23) — because
+// RAW+JPEG copies of one shot often live in different folders.
+// Pure frontend filter — applies to ALL grids (photos / rejects /
+// duplicates / search results).
 // The `hideDupRaw` STATE itself lives near the menu handlers above (the
 // module calls syncHideRawCheck() at the top level, before this block).
 // ---------------------------------------------------------------------------
@@ -368,19 +375,18 @@ function rawPairKey(p) {
   };
 }
 
-/// IDs of RAW files that have a same-named JPEG in the same folder.
+/// IDs of RAW files that have a same-named JPEG anywhere in the library.
 function dupRawHideSet(list) {
   const hide = new Set();
   if (!hideDupRaw) return hide;
-  const byKey = new Map(); // dir/base -> { jpegs: n, rawIds: [] }
+  const byKey = new Map(); // stem (base, no ext) -> { jpegs: n, rawIds: [] }
   for (const p of list) {
     const k = rawPairKey(p);
     if (!k) continue;
-    const key = `${k.dir}/${k.base}`;
-    let e = byKey.get(key);
+    let e = byKey.get(k.base);
     if (!e) {
       e = { jpegs: 0, rawIds: [] };
-      byKey.set(key, e);
+      byKey.set(k.base, e);
     }
     if (JPEG_EXTS.has(k.ext)) e.jpegs++;
     else if (RAWSIDE_EXTS.has(k.ext)) e.rawIds.push(p.id);
@@ -1467,15 +1473,104 @@ function modelStatusText(status) {
       return status;
   }
 }
+// --- Model download / engine-load badge (C-19.29) -------------------------
+// One floating badge (bottom-left) tells the user the app is busy setting
+// up AI models instead of looking dead: real % while files download, an
+// indeterminate sweep while the engine loads. get_ai_status is polled as a
+// fallback — the engine phase emits no events, and a failed load must not
+// leave the badge hanging forever. (The listener comes after these
+// declarations: a download event can arrive while the module is still
+// initializing, and a `let` read before its line would throw — the TDZ bug
+// from C-19.22.)
+let modelPollTimer = null; // status poll while the badge is visible
+let modelBadgeTimer = null; // delayed hide (failure message)
+
+function showModelBadge(title, count, pct) {
+  clearTimeout(modelBadgeTimer);
+  els.modelBadgeTitle.textContent = title;
+  els.modelBadgeCount.textContent = count || "";
+  const fill = els.modelBadgeFill;
+  fill.classList.toggle("tagging-badge__fill--busy", pct === null || pct === undefined);
+  fill.style.width =
+    pct === null || pct === undefined
+      ? "100%"
+      : `${Math.max(0, Math.min(100, Math.round(pct * 100)))}%`;
+  els.modelBadge.hidden = false;
+}
+
+function stopModelPoll() {
+  if (modelPollTimer) {
+    clearInterval(modelPollTimer);
+    modelPollTimer = null;
+  }
+}
+
+function hideModelBadge() {
+  els.modelBadge.hidden = true;
+  clearTimeout(modelBadgeTimer);
+  stopModelPoll();
+}
+
+function startModelPoll() {
+  if (modelPollTimer) return;
+  modelPollTimer = setInterval(async () => {
+    let s = "";
+    try {
+      s = await invoke("get_ai_status");
+    } catch (e) {
+      return; // transient invoke failure — keep polling
+    }
+    if (String(s).startsWith("locked")) {
+      // Engine ready: the queue (and its tagging badge) takes over.
+      hideModelBadge();
+    } else if (String(s).startsWith("degraded")) {
+      // Load failed — surface it briefly, details live in Settings.
+      stopModelPoll();
+      showModelBadge(t("model.failed"), t("model.failedHint"), null);
+      modelBadgeTimer = setTimeout(hideModelBadge, 10000);
+    }
+  }, 2000);
+}
+
+/// Startup probe (C-19.29): the engine loads right after model verification
+/// and emits no progress events — show the indeterminate badge until the
+/// status flips, so the first seconds after launch never look frozen.
+async function primeModelBadge() {
+  let s = "";
+  try {
+    s = await invoke("get_ai_status");
+  } catch (e) {
+    return; // status unavailable — the model-download events still drive it
+  }
+  if (String(s).startsWith("locked")) return;
+  showModelBadge(t("model.loading"), t("model.loadingHint"), null);
+  startModelPoll();
+}
+
 listen("model-download", (ev) => {
   const d = ev.payload || {};
+  const pct = typeof d.progress === "number" ? d.progress : null;
+  // Settings status line (unchanged).
   if (d.status === "locked") {
     setModelStatus(t("settings.modelLocked"));
   } else if (d.status === "downloading") {
-    const pct = d.progress !== undefined ? ` ${Math.round(d.progress * 100)}%` : "";
-    setModelStatus(`${t("settings.modelDownloading")} ${d.file_name || ""}${pct}`.trim());
+    const p = pct !== null ? ` ${Math.round(pct * 100)}%` : "";
+    setModelStatus(`${t("settings.modelDownloading")} ${d.file_name || ""}${p}`.trim());
   } else {
     setModelStatus(d.message || d.status || "");
+  }
+  // Main-window badge (C-19.29): the Settings line alone left the main
+  // window looking frozen during a first-run download / engine load.
+  if (d.status === "downloading") {
+    const p = pct !== null ? `${Math.round(pct * 100)}%` : "";
+    showModelBadge(t("model.downloading"), `${d.file_name || ""} ${p}`.trim(), pct);
+    startModelPoll();
+  } else if (d.status === "locked" && d.file_name === "-") {
+    // Every model file is verified — the engine load follows without
+    // progress events, so switch to the indeterminate "loading" badge; the
+    // status poll hides it once get_ai_status reports locked.
+    showModelBadge(t("model.loading"), t("model.loadingHint"), null);
+    startModelPoll();
   }
 });
 async function refreshModelStatus() {
@@ -4426,6 +4521,11 @@ els.btnReplayOnboarding.addEventListener("click", () => {
   } catch (e) {
     /* keep silent — tour is optional */
   }
+  // Model setup badge (C-19.29): the engine loads right after model
+  // verification at startup — show the indeterminate "loading" badge until
+  // get_ai_status flips, so the app never looks frozen while AI comes up
+  // (a first-run model download refines it into a real percentage).
+  primeModelBadge();
   // Startup update check (C-18): deferred so it never races first paint;
   // dev builds short-circuit in the backend (debug_assertions). Retried once
   // 30s later if the first attempt threw (transient network).

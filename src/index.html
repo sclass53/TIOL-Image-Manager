@@ -395,6 +395,19 @@
     <span class="tagging-badge__count" id="reject-count"></span>
   </div>
 
+  <!-- Model download / engine-load badge (bottom-left, C-19.29): a first-run
+       model download takes minutes and the engine load takes seconds more —
+       progress used to be visible on the Settings page only, so the main
+       window looked frozen. Same look as the tagging badge, but bottom-left
+       (the top-right corner is shared by the tagging + reject badges). -->
+  <div class="tagging-badge model-badge" id="model-badge" hidden>
+    <span class="tagging-badge__title" id="model-badge-title">正在加载 AI 引擎</span>
+    <div class="tagging-badge__bar">
+      <div class="tagging-badge__fill" id="model-badge-fill"></div>
+    </div>
+    <span class="tagging-badge__count" id="model-badge-count"></span>
+  </div>
+
   <!-- Self-update banner (top-center, C-18): hash comparison against
        tiol.netlify.app/version.json — shown once at startup when newer -->
   <div class="update-banner" id="update-banner" hidden>

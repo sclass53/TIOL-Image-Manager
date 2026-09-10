@@ -263,5 +263,12 @@
     "gpu": "GPU renderer: {renderer}",
     "gpuSoftware": "(software rendering — hardware acceleration inactive)",
     "gpuUnknown": "GPU renderer: unable to detect"
+  },
+  "model": {
+    "downloading": "Downloading AI model",
+    "loading": "Loading AI engine",
+    "loadingHint": "First run downloads the models — please wait",
+    "failed": "AI model failed to load",
+    "failedHint": "See Settings for details"
   }
 }
