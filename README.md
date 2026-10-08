@@ -42,6 +42,7 @@ All photos stay on your own hard drive. AI inference runs completely offline. No
 ## Installation
 
 [Releases](https://github.com/sclass53/TIOL-Image-Manager/releases)
+
 [Official Website (With Releases)](https://tiol.netlify.app)
 
 ## Quick Start
