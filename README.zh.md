@@ -41,7 +41,8 @@
 
 ## 安装
 
-[点击查看打包好的版本](https://github.com/sclass53/TIOL-Image-Manager/releases)
+[查看打包好的版本](https://github.com/sclass53/TIOL-Image-Manager/releases)
+
 [官方网站](tiol.netlify.app)
 
 ## 快速开始
