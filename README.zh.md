@@ -3,9 +3,9 @@
 
 [👉官方网站](https://tiol.netlify.app)
 
-# TIOL — AI Local Photo Manager
+# TIOL — AI 本地照片管理器
 
-隐私优先，本地优先的照片管理应用。自动为您的摄影作品打标签。支持快速，智能的搜索。
+专业，隐私优先，本地优先的照片管理应用。自动管理你的作品。支持快速，智能的搜索。
 
 [![版本](https://img.shields.io/badge/dynamic/json?url=https://tiol.netlify.app/version.json&label=版本&query=$.version&color=blue&style=flat-square)](https://github.com/sclass53/TIOL-Image-Manager/releases)
 [![许可证](https://img.shields.io/badge/license-GPLv3-blue?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
@@ -19,25 +19,41 @@
 
 ## 功能
 
-- 🔍 **AI驱动的双搜索**：**语义搜索**（描述要找的内容，如 "a cup of coffee"）+ **标签搜索**（快速）
+- 🔍 **AI驱动的双搜索**：
 
-- 📄 **快速筛选重复照片**: 一键整理重复照片，识别过曝/欠曝的废片。
+  **语义搜索**（描述要找的内容，如 "a cup of coffee"）+ **标签搜索**（快速）
 
-- 📚 **相簿**：自定义相簿 + 镜头组 / 颜色组智能分组；支持多选导入与拖拽整理。
+- 📄 **快速筛选重复照片**:
 
-- 💻 **多平台支持**: 支持Windows, MacOS, 和Linux. 支持英伟达 CUDA, cpu, 苹果 CoreML, 等等
+  一键整理重复照片，识别过曝/欠曝的废片。为专业人士设计。
 
-- ⚡ **轻量化**: ~50MB的体积，仅单exe和系统onnx驱动，提供移动版。
+- 📷 **基于镜头分类**:
 
-- 📷 **基于镜头分类**: 筛选不同镜头、不同焦段下拍摄的照片。
+  筛选不同镜头、不同焦段下拍摄的照片。
 
-- 📁 **目录管理**：添加/移除照片目录，文件系统监控（新增/修改自动入队处理）
+- 📄 **Raw 支持**:
 
-- 🏷️ **自定义标签**：AI 打标——在“标签”页输入任意标签（中英文均可）；文件变更自动索引.
+  支持大部分RAW格式, 包括 SONY ARW, NIKON NEF, CANON CRW, PEF 和 DNG格式等.
 
-- 🖥️ **AI 引擎可选**：auto / GPU / CPU / Apple CoreML（Neural Engine 原生加速），全本地运行
+- 📚 **相簿**：
 
-- 🔒 **模型锁定**：SHA256 校验 + 断点续传 + 国内镜像回退，模型损坏自动修复
+  自定义相簿 + 镜头组 / 颜色组智能分组；支持多选导入与拖拽整理。
+
+- 💻 **多平台支持**:
+
+  支持Windows, MacOS, 和Linux. 支持英伟达 CUDA, cpu, 苹果 CoreML, 等等
+
+- ⚡ **轻量化**:
+
+  ~50MB的体积，仅单exe和系统onnx驱动，提供移动版。
+
+- 📁 **目录管理**：
+
+  添加/移除照片目录，文件系统监控（新增/修改自动入队处理）
+
+- 🖥️ **AI 引擎可选**：
+
+  auto / GPU / CPU / Apple CoreML（Neural Engine 原生加速），全本地运行
 
 ## 安装
 
