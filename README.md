@@ -5,7 +5,7 @@ English | [中文](README.zh.md)
 
 # TIOL — AI Local Photo Manager
 
-Your privacy-first, local-first photo manager. Automatically tags photos. Built-in fast, intelligent searching. 
+Your advanced, privacy-first, local-first photo manager. Automatically tags photos. Built-in fast, intelligent searching. 
 
 [![Version](https://img.shields.io/badge/dynamic/json?url=https://tiol.netlify.app/version.json&label=version&query=$.version&color=blue&style=flat-square)](https://github.com/sclass53/TIOL-Image-Manager/releases)
 [![License](https://img.shields.io/badge/license-GPLv3-blue?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0)
